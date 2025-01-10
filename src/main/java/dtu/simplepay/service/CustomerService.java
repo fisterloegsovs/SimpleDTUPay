@@ -4,14 +4,17 @@ import dtu.simplepay.model.CustomerModel;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CustomerService {
-    private Map<String, CustomerModel> customers = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
+    private final Map<String, CustomerModel> customers = new ConcurrentHashMap<>();
     private final BankService bankService;
 
     public CustomerService(BankService bankService) {
@@ -19,6 +22,10 @@ public class CustomerService {
     }
 
     public CustomerModel registerCustomer(String name, String cprNumber, BigDecimal initialBalance) throws BankServiceException_Exception {
+        if (name == null || name.isEmpty() || cprNumber == null || cprNumber.isEmpty() || initialBalance == null || initialBalance.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Invalid input parameters");
+        }
+
         String id = UUID.randomUUID().toString();
 
         User user = new User();
@@ -37,6 +44,8 @@ public class CustomerService {
         CustomerModel customer = customers.remove(id);
         if (customer != null) {
             bankService.retireAccount(customer.getAccountNumber());
+        } else {
+            logger.warn("Attempted to unregister non-existent customer with id: {}", id);
         }
     }
 

@@ -4,14 +4,17 @@ import dtu.simplepay.model.MerchantModel;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MerchantService {
-    private Map<String, MerchantModel> merchants = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(MerchantService.class);
+    private final Map<String, MerchantModel> merchants = new ConcurrentHashMap<>();
     private final BankService bankService;
 
     public MerchantService(BankService bankService) {
@@ -19,6 +22,10 @@ public class MerchantService {
     }
 
     public MerchantModel registerMerchant(String name, String cprNumber, BigDecimal initialBalance) throws BankServiceException_Exception {
+        if (name == null || name.isEmpty() || cprNumber == null || cprNumber.isEmpty() || initialBalance == null || initialBalance.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Invalid input parameters");
+        }
+
         String id = UUID.randomUUID().toString();
 
         User user = new User();
@@ -37,6 +44,8 @@ public class MerchantService {
         MerchantModel merchant = merchants.remove(id);
         if (merchant != null) {
             bankService.retireAccount(merchant.getAccountNumber());
+        } else {
+            logger.warn("Attempted to unregister non-existent merchant with id: {}", id);
         }
     }
 

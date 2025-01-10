@@ -6,6 +6,10 @@ public class CustomerModel {
     private String cprNumber;
     private String accountNumber;
 
+    public CustomerModel() {
+        // No-argument constructor for frameworks
+    }
+
     public CustomerModel(String id, String name, String cprNumber, String accountNumber) {
         this.id = id;
         this.name = name;
@@ -18,6 +22,9 @@ public class CustomerModel {
     }
 
     public void setId(String id) {
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be null or empty");
+        }
         this.id = id;
     }
 
@@ -26,6 +33,9 @@ public class CustomerModel {
     }
 
     public void setName(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
         this.name = name;
     }
 
@@ -34,6 +44,9 @@ public class CustomerModel {
     }
 
     public void setCprNumber(String cprNumber) {
+        if (cprNumber == null || cprNumber.isEmpty()) {
+            throw new IllegalArgumentException("CPR number cannot be null or empty");
+        }
         this.cprNumber = cprNumber;
     }
 
@@ -42,6 +55,9 @@ public class CustomerModel {
     }
 
     public void setAccountNumber(String accountNumber) {
+        if (accountNumber == null || accountNumber.isEmpty()) {
+            throw new IllegalArgumentException("Account number cannot be null or empty");
+        }
         this.accountNumber = accountNumber;
     }
 }
